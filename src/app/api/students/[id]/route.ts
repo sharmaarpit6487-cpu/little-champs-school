@@ -2,15 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
 import { createAuditLog } from "@/lib/audit";
+import { assertStudentRecordAccess } from "@/lib/access-control";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAuth("students:read");
-  if (error) return error;
+  const { error, session } = await requireAuth();
+  if (error || !session) return error!;
 
   const { id } = await params;
+
+  const access = await assertStudentRecordAccess(session, id);
+  if (access.error) return access.error;
 
   const student = await prisma.student.findUnique({
     where: { id },

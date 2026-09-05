@@ -53,6 +53,10 @@ export function generateApplicationNo(): string {
   return `${prefix}${random}`;
 }
 
+export function generateEmployeeId(sequence: number): string {
+  return `EMP${String(sequence).padStart(3, "0")}`;
+}
+
 export function calculateLateFee(
   dueDate: Date,
   amount: number,

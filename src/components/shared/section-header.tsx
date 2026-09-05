@@ -6,6 +6,7 @@ interface SectionHeaderProps {
   description?: string;
   align?: "left" | "center";
   className?: string;
+  light?: boolean;
 }
 
 export function SectionHeader({
@@ -14,34 +15,34 @@ export function SectionHeader({
   description,
   align = "center",
   className,
+  light = false,
 }: SectionHeaderProps) {
   return (
-    <div
-      className={cn(
-        "mb-12",
-        align === "center" && "text-center",
-        className
-      )}
-    >
+    <div className={cn("mb-12 md:mb-16", align === "center" && "text-center", className)}>
       {subtitle && (
-        <p className="text-gold font-semibold text-sm uppercase tracking-wider mb-2">
+        <span className="inline-block px-4 py-1.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-sm font-bold uppercase tracking-wide mb-4">
           {subtitle}
-        </p>
+        </span>
       )}
-      <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground">
+      <h2
+        className={cn(
+          "font-display text-3xl md:text-4xl lg:text-5xl font-bold leading-tight",
+          light ? "text-white" : "text-slate-800 dark:text-white"
+        )}
+      >
         {title}
       </h2>
       {description && (
-        <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">
+        <p
+          className={cn(
+            "mt-4 max-w-2xl text-lg leading-relaxed",
+            align === "center" && "mx-auto",
+            light ? "text-white/80" : "text-slate-600 dark:text-slate-400"
+          )}
+        >
           {description}
         </p>
       )}
-      <div
-        className={cn(
-          "mt-4 h-1 w-20 bg-gold rounded-full",
-          align === "center" && "mx-auto"
-        )}
-      />
     </div>
   );
 }

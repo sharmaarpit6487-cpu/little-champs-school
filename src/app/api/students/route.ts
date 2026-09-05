@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
 import { studentSchema } from "@/lib/validations";
 import { createAuditLog } from "@/lib/audit";
 import { generateStudentId } from "@/lib/utils";
+import { hashPassword, validatePasswordStrength } from "@/lib/users";
+import { Role } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   const { error } = await requireAuth("students:read");
@@ -13,12 +14,18 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") || "";
   const classId = searchParams.get("classId");
+  const division = searchParams.get("division");
+  const grade = searchParams.get("grade");
   const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "20");
+  const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
 
   const where = {
     isActive: true,
-    ...(classId && { classId }),
+    ...(classId && classId !== "all" && { classId }),
+    ...(division && division !== "all" && { division }),
+    ...(grade && grade !== "all" && {
+      class: { grade: parseInt(grade, 10) },
+    }),
     ...(search && {
       OR: [
         { firstName: { contains: search, mode: "insensitive" as const } },
@@ -37,7 +44,7 @@ export async function GET(req: NextRequest) {
         parents: { include: { parent: true } },
         fees: { where: { status: { in: ["PENDING", "OVERDUE"] } } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ class: { grade: "asc" } }, { division: "asc" }, { rollNumber: "asc" }],
       skip: (page - 1) * limit,
       take: limit,
     }),
@@ -62,7 +69,32 @@ export async function POST(req: NextRequest) {
     const count = await prisma.student.count();
     const studentId = generateStudentId(year, count + 1);
 
+    const portalEmail =
+      data.createPortalAccount && data.portalEmail?.trim()
+        ? data.portalEmail.trim().toLowerCase()
+        : data.email?.trim() || null;
+
     const student = await prisma.$transaction(async (tx) => {
+      let userId: string | undefined;
+
+      if (data.createPortalAccount && portalEmail && data.password) {
+        const strengthError = validatePasswordStrength(data.password);
+        if (strengthError) throw new Error(strengthError);
+        const existingUser = await tx.user.findUnique({ where: { email: portalEmail } });
+        if (existingUser) throw new Error("An account with this email already exists");
+        const hashed = await hashPassword(data.password);
+        const portalUser = await tx.user.create({
+          data: {
+            email: portalEmail,
+            password: hashed,
+            name: `${data.firstName} ${data.lastName}`,
+            role: Role.STUDENT,
+            isActive: true,
+          },
+        });
+        userId = portalUser.id;
+      }
+
       const parent = await tx.parent.create({
         data: {
           firstName: data.parentFirstName,
@@ -75,6 +107,7 @@ export async function POST(req: NextRequest) {
       const newStudent = await tx.student.create({
         data: {
           studentId,
+          userId,
           firstName: data.firstName,
           lastName: data.lastName,
           dateOfBirth: new Date(data.dateOfBirth),
@@ -88,7 +121,7 @@ export async function POST(req: NextRequest) {
           state: data.state,
           pincode: data.pincode,
           phone: data.phone,
-          email: data.email || undefined,
+          email: portalEmail || data.email || undefined,
           admissionDate: new Date(data.admissionDate),
           parents: {
             create: { parentId: parent.id, isPrimary: true },

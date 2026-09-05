@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { FileText, CheckCircle, IndianRupee } from "lucide-react";
 import { PageHero } from "@/components/shared/page-hero";
 import { AnimatedSection, SlideUp } from "@/components/shared/animated-section";
 import { SectionHeader } from "@/components/shared/section-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,10 +30,16 @@ import {
 } from "@/components/ui/table";
 import { admissionSchema } from "@/lib/validations";
 import { ADMISSION_STEPS, FEE_STRUCTURE } from "@/lib/school-data";
+import { SCHOOL_IMAGES } from "@/lib/school-images";
 import { formatCurrency } from "@/lib/utils";
 import type { z } from "zod";
 
 type AdmissionForm = z.infer<typeof admissionSchema>;
+
+const APPLYING_CLASSES = [
+  "Nursery", "KG", "Class 1", "Class 2", "Class 3", "Class 4",
+  "Class 5", "Class 6", "Class 7", "Class 8",
+];
 
 export default function AdmissionsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +47,7 @@ export default function AdmissionsPage() {
   const {
     register,
     handleSubmit,
-    setValue,
+    control,
     reset,
     formState: { errors },
   } = useForm<AdmissionForm>({
@@ -73,6 +79,8 @@ export default function AdmissionsPage() {
         title="Admissions"
         subtitle="Join Us"
         description="Begin your child's journey of excellence. Admissions open for 2025-26 academic year."
+        image={SCHOOL_IMAGES.studentsAchievement}
+        imageAlt="Little Champs School students"
       />
 
       <AnimatedSection className="section-padding">
@@ -83,7 +91,7 @@ export default function AdmissionsPage() {
               <SlideUp key={step.step} delay={step.step * 0.1}>
                 <Card className="text-center h-full relative">
                   <CardContent className="p-6">
-                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-navy text-white font-bold text-lg">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-lg">
                       {step.step}
                     </div>
                     <h3 className="font-semibold mb-2">{step.title}</h3>
@@ -106,71 +114,116 @@ export default function AdmissionsPage() {
               />
               <Card>
                 <CardContent className="p-6">
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
                     <div>
                       <Label htmlFor="studentName">Student Name *</Label>
-                      <Input id="studentName" {...register("studentName")} />
+                      <Input
+                        id="studentName"
+                        autoFocus
+                        aria-invalid={!!errors.studentName}
+                        {...register("studentName")}
+                      />
                       {errors.studentName && (
-                        <p className="text-sm text-destructive mt-1">{errors.studentName.message}</p>
+                        <p className="text-sm text-destructive mt-1" role="alert">{errors.studentName.message}</p>
                       )}
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="dateOfBirth">Date of Birth *</Label>
-                        <Input id="dateOfBirth" type="date" {...register("dateOfBirth")} />
+                        <Input
+                          id="dateOfBirth"
+                          type="date"
+                          aria-invalid={!!errors.dateOfBirth}
+                          {...register("dateOfBirth")}
+                        />
+                        {errors.dateOfBirth && (
+                          <p className="text-sm text-destructive mt-1" role="alert">{errors.dateOfBirth.message}</p>
+                        )}
                       </div>
                       <div>
-                        <Label>Gender *</Label>
-                        <Select onValueChange={(v) => setValue("gender", v as "MALE" | "FEMALE" | "OTHER")}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="MALE">Male</SelectItem>
-                            <SelectItem value="FEMALE">Female</SelectItem>
-                            <SelectItem value="OTHER">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="gender">Gender *</Label>
+                        <Controller
+                          name="gender"
+                          control={control}
+                          render={({ field }) => (
+                            <>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <SelectTrigger id="gender" aria-invalid={!!errors.gender}>
+                                  <SelectValue placeholder="Select" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="MALE">Male</SelectItem>
+                                  <SelectItem value="FEMALE">Female</SelectItem>
+                                  <SelectItem value="OTHER">Other</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              {errors.gender && (
+                                <p className="text-sm text-destructive mt-1" role="alert">{errors.gender.message}</p>
+                              )}
+                            </>
+                          )}
+                        />
                       </div>
                     </div>
                     <div>
-                      <Label>Applying for Class *</Label>
-                      <Select onValueChange={(v) => setValue("applyingClass", v)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select class" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["Nursery", "KG", "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
-                            "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12"
-                          ].map((c) => (
-                            <SelectItem key={c} value={c}>{c}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="applyingClass">Applying for Class *</Label>
+                      <Controller
+                        name="applyingClass"
+                        control={control}
+                        render={({ field }) => (
+                          <>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger id="applyingClass" aria-invalid={!!errors.applyingClass}>
+                                <SelectValue placeholder="Select class" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {APPLYING_CLASSES.map((c) => (
+                                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {errors.applyingClass && (
+                              <p className="text-sm text-destructive mt-1" role="alert">{errors.applyingClass.message}</p>
+                            )}
+                          </>
+                        )}
+                      />
                     </div>
                     <div>
                       <Label htmlFor="parentName">Parent/Guardian Name *</Label>
-                      <Input id="parentName" {...register("parentName")} />
+                      <Input id="parentName" aria-invalid={!!errors.parentName} {...register("parentName")} />
+                      {errors.parentName && (
+                        <p className="text-sm text-destructive mt-1" role="alert">{errors.parentName.message}</p>
+                      )}
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="parentEmail">Parent Email *</Label>
-                        <Input id="parentEmail" type="email" {...register("parentEmail")} />
+                        <Input id="parentEmail" type="email" aria-invalid={!!errors.parentEmail} {...register("parentEmail")} />
+                        {errors.parentEmail && (
+                          <p className="text-sm text-destructive mt-1" role="alert">{errors.parentEmail.message}</p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="parentPhone">Parent Phone *</Label>
-                        <Input id="parentPhone" {...register("parentPhone")} />
+                        <Input id="parentPhone" aria-invalid={!!errors.parentPhone} {...register("parentPhone")} />
+                        {errors.parentPhone && (
+                          <p className="text-sm text-destructive mt-1" role="alert">{errors.parentPhone.message}</p>
+                        )}
                       </div>
                     </div>
                     <div>
                       <Label htmlFor="address">Address *</Label>
-                      <Textarea id="address" {...register("address")} />
+                      <Textarea id="address" aria-invalid={!!errors.address} {...register("address")} />
+                      {errors.address && (
+                        <p className="text-sm text-destructive mt-1" role="alert">{errors.address.message}</p>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="previousSchool">Previous School</Label>
                       <Input id="previousSchool" {...register("previousSchool")} />
                     </div>
-                    <Button type="submit" variant="gold" className="w-full" disabled={isSubmitting}>
+                    <Button type="submit" variant="default" className="w-full" disabled={isSubmitting}>
                       {isSubmitting ? "Submitting..." : "Submit Application"}
                     </Button>
                   </form>
@@ -192,7 +245,7 @@ export default function AdmissionsPage() {
                       "Medical fitness certificate",
                     ].map((doc) => (
                       <div key={doc} className="flex items-center gap-3">
-                        <FileText className="h-4 w-4 text-gold shrink-0" />
+                        <FileText className="h-4 w-4 text-brand-yellow dark:text-amber-400 shrink-0" />
                         <span className="text-sm">{doc}</span>
                       </div>
                     ))}
@@ -230,8 +283,8 @@ export default function AdmissionsPage() {
             title="Fee Structure Overview"
             description="Monthly fee breakdown (Transport optional)"
           />
-          <Card>
-            <CardContent className="p-0">
+          <Card className="rounded-2xl border-0 shadow-soft">
+            <CardContent className="p-0 overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -249,7 +302,7 @@ export default function AdmissionsPage() {
                       <TableCell>{formatCurrency(fee.tuition)}</TableCell>
                       <TableCell>{formatCurrency(fee.transport)}</TableCell>
                       <TableCell>{formatCurrency(fee.exam)}</TableCell>
-                      <TableCell className="text-right font-semibold text-gold">
+                      <TableCell className="text-right font-semibold text-brand-yellow dark:text-amber-400">
                         {formatCurrency(fee.total)}
                       </TableCell>
                     </TableRow>

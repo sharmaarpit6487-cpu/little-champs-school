@@ -3,12 +3,28 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+const CLASS_SEED = [
+  { name: "Nursery", grade: 0, section: "A" },
+  { name: "Jr. KG", grade: -1, section: "A" },
+  { name: "Sr. KG", grade: -2, section: "A" },
+  { name: "Class 1", grade: 1, section: "A" },
+  { name: "Class 2", grade: 2, section: "A" },
+  { name: "Class 3", grade: 3, section: "A" },
+  { name: "Class 4", grade: 4, section: "A" },
+  { name: "Class 5", grade: 5, section: "A" },
+  { name: "Class 6", grade: 6, section: "A" },
+  { name: "Class 7", grade: 7, section: "A" },
+  { name: "Class 8", grade: 8, section: "A" },
+  { name: "Class 8", grade: 8, section: "B" },
+];
+
 async function main() {
   console.log("🌱 Seeding database...");
 
   const hashedAdmin = await bcrypt.hash("admin123", 12);
   const hashedParent = await bcrypt.hash("parent123", 12);
   const hashedStudent = await bcrypt.hash("student123", 12);
+  const hashedTeacher = await bcrypt.hash("teacher123", 12);
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@littlechamps.edu" },
@@ -43,23 +59,28 @@ async function main() {
     },
   });
 
+  const teacherUser = await prisma.user.upsert({
+    where: { email: "teacher@littlechamps.edu" },
+    update: {},
+    create: {
+      email: "teacher@littlechamps.edu",
+      password: hashedTeacher,
+      name: "Priya Sharma",
+      role: Role.TEACHER,
+    },
+  });
+
   const classes = await Promise.all(
-    [
-      { name: "Class 8", grade: 8, section: "A" },
-      { name: "Class 8", grade: 8, section: "B" },
-      { name: "Class 9", grade: 9, section: "A" },
-      { name: "Class 10", grade: 10, section: "A" },
-      { name: "Class 5", grade: 5, section: "A" },
-    ].map((c) =>
+    CLASS_SEED.map((c) =>
       prisma.class.upsert({
         where: { grade_section: { grade: c.grade, section: c.section } },
-        update: {},
+        update: { name: c.name, isActive: true },
         create: {
           name: c.name,
           grade: c.grade,
           section: c.section,
           capacity: 40,
-          classTeacher: "Mrs. Anjali Desai",
+          classTeacher: "Mrs. Khilna Shah",
         },
       })
     )
@@ -115,10 +136,10 @@ async function main() {
       classId: class8A.id,
       division: "A",
       rollNumber: "15",
-      address: "456 Park Avenue, Andheri",
-      city: "Mumbai",
+      address: "456 Park Avenue, Bhiwandi",
+      city: "Bhiwandi",
       state: "Maharashtra",
-      pincode: "400058",
+      pincode: "421305",
       phone: "+91 9876543211",
       email: "student@example.com",
       admissionDate: new Date("2018-04-01"),
@@ -142,10 +163,10 @@ async function main() {
         classId: class8A.id,
         division: i % 2 === 0 ? "A" : "B",
         rollNumber: String(i),
-        address: `${i} Sample Street, Mumbai`,
-        city: "Mumbai",
+        address: `${i} Sample Street, Bhiwandi`,
+        city: "Bhiwandi",
         state: "Maharashtra",
-        pincode: "400001",
+        pincode: "421305",
         admissionDate: new Date("2020-04-01"),
       },
     });
@@ -153,42 +174,23 @@ async function main() {
   }
 
   for (const s of students) {
-    await prisma.fee.create({
-      data: {
-        studentId: s.id,
-        feeType: FeeType.TUITION,
-        title: "Tuition Fee - January 2025",
-        amount: 5500,
-        dueDate: new Date("2025-01-10"),
-        status: PaymentStatus.PENDING,
-        academicYear: "2024-25",
-        month: "January",
-      },
+    const existingFee = await prisma.fee.findFirst({
+      where: { studentId: s.id, title: "Tuition Fee - January 2025" },
     });
-
-    const decFee = await prisma.fee.create({
-      data: {
-        studentId: s.id,
-        feeType: FeeType.TUITION,
-        title: "Tuition Fee - December 2024",
-        amount: 5500,
-        dueDate: new Date("2024-12-10"),
-        status: PaymentStatus.PAID,
-        academicYear: "2024-25",
-        month: "December",
-      },
-    });
-
-    await prisma.feePayment.create({
-      data: {
-        feeId: decFee.id,
-        studentId: s.id,
-        amount: 5500,
-        paymentMethod: "UPI",
-        receiptNumber: `RCP202412${String(Math.floor(Math.random() * 10000)).padStart(4, "0")}`,
-        collectedBy: "Admin User",
-      },
-    });
+    if (!existingFee) {
+      await prisma.fee.create({
+        data: {
+          studentId: s.id,
+          feeType: FeeType.TUITION,
+          title: "Tuition Fee - January 2025",
+          amount: 5500,
+          dueDate: new Date("2025-01-10"),
+          status: PaymentStatus.PENDING,
+          academicYear: "2024-25",
+          month: "January",
+        },
+      });
+    }
   }
 
   await prisma.announcement.createMany({
@@ -205,51 +207,15 @@ async function main() {
         type: AnnouncementType.FEE,
         targetRoles: [Role.PARENT],
       },
-      {
-        title: "Parent-Teacher Meeting",
-        content: "PTM scheduled for December 28, 2024. Please confirm your attendance.",
-        type: AnnouncementType.ACADEMIC,
-        targetRoles: [Role.PARENT],
-      },
     ],
+    skipDuplicates: true,
   });
 
-  await prisma.event.createMany({
-    data: [
-      {
-        title: "Annual Day Celebration 2025",
-        description: "Grand Annual Day celebration with cultural performances and awards.",
-        type: "CULTURAL",
-        startDate: new Date("2025-03-15"),
-        location: "School Auditorium",
-      },
-      {
-        title: "Science Exhibition",
-        description: "Students showcase innovative science projects.",
-        type: "ACADEMIC",
-        startDate: new Date("2025-02-20"),
-        location: "Science Block",
-      },
-    ],
-  });
-
-  await prisma.admission.create({
-    data: {
-      applicationNo: "ADM202500001",
-      studentName: "Ishaan Verma",
-      dateOfBirth: new Date("2019-03-10"),
-      gender: Gender.MALE,
-      applyingClass: "Class 1",
-      parentName: "Suresh Verma",
-      parentEmail: "suresh.verma@example.com",
-      parentPhone: "+91 9876543299",
-      address: "789 Lake Road, Mumbai",
-      status: "PENDING",
-    },
-  });
-
-  await prisma.teacher.create({
-    data: {
+  await prisma.teacher.upsert({
+    where: { email: "principal@littlechamps.edu" },
+    update: { userId: teacherUser.id },
+    create: {
+      userId: teacherUser.id,
       employeeId: "EMP001",
       firstName: "Priya",
       lastName: "Sharma",
@@ -264,10 +230,13 @@ async function main() {
   });
 
   console.log("✅ Seed completed!");
-  console.log("\n📋 Demo Credentials:");
-  console.log("  Admin:   admin@littlechamps.edu / admin123");
-  console.log("  Parent:  parent@example.com / parent123");
-  console.log("  Student: student@example.com / student123");
+  if (process.env.NODE_ENV !== "production") {
+    console.log("\n📋 Development test accounts (not shown on public login):");
+    console.log("  Admin:   admin@littlechamps.edu");
+    console.log("  Teacher: teacher@littlechamps.edu");
+    console.log("  Parent:  parent@example.com");
+    console.log("  Student: student@example.com");
+  }
 }
 
 main()
