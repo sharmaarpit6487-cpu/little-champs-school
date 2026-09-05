@@ -1,28 +1,83 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Search, Mail, Phone } from "lucide-react";
 import { PageHero } from "@/components/shared/page-hero";
 import { AnimatedSection, SlideUp } from "@/components/shared/animated-section";
-import { SectionHeader } from "@/components/shared/section-header";
+import { SchoolImage } from "@/components/shared/school-image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SCHOOL_INFO } from "@/lib/school-data";
+import { SCHOOL_IMAGES } from "@/lib/school-images";
+import { getInitials } from "@/lib/utils";
 
 const FACULTY = [
-  { id: 1, name: "Dr. Priya Sharma", designation: "Principal", department: "Administration", qualification: "Ph.D. in Education", experience: 25, image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop", email: "principal@littlechamps.edu", phone: "+91 98765 43200" },
-  { id: 2, name: "Mr. Rajesh Kumar", designation: "Vice Principal", department: "Administration", qualification: "M.Ed., M.Sc. Physics", experience: 20, image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop", email: "viceprincipal@littlechamps.edu", phone: "+91 98765 43201" },
-  { id: 3, name: "Mrs. Anjali Desai", designation: "HOD - English", department: "Languages", qualification: "M.A. English, B.Ed.", experience: 15, image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop", email: "anjali.desai@littlechamps.edu", phone: "+91 98765 43202" },
-  { id: 4, name: "Mr. Suresh Menon", designation: "HOD - Mathematics", department: "Mathematics", qualification: "M.Sc. Mathematics, B.Ed.", experience: 18, image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop", email: "suresh.menon@littlechamps.edu", phone: "+91 98765 43203" },
-  { id: 5, name: "Dr. Kavita Nair", designation: "HOD - Science", department: "Science", qualification: "Ph.D. Chemistry, B.Ed.", experience: 16, image: "https://images.unsplash.com/photo-1594744803329-e58b31de8bf0?w=300&h=300&fit=crop", email: "kavita.nair@littlechamps.edu", phone: "+91 98765 43204" },
-  { id: 6, name: "Mr. Amit Patel", designation: "Sports Director", department: "Physical Education", qualification: "M.P.Ed., NIS Certificate", experience: 12, image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop", email: "amit.patel@littlechamps.edu", phone: "+91 98765 43205" },
-  { id: 7, name: "Mrs. Deepa Iyer", designation: "Art Teacher", department: "Arts", qualification: "M.F.A., B.Ed.", experience: 10, image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop", email: "deepa.iyer@littlechamps.edu", phone: "+91 98765 43206" },
-  { id: 8, name: "Mr. Vikram Singh", designation: "Computer Science Teacher", department: "Computer Science", qualification: "M.Tech. CSE, B.Ed.", experience: 8, image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop", email: "vikram.singh@littlechamps.edu", phone: "+91 98765 43207" },
+  {
+    id: 1,
+    name: SCHOOL_INFO.principal.name,
+    designation: "Principal",
+    department: "Administration",
+    qualification: SCHOOL_INFO.principal.qualification,
+    experience: 20,
+    image: SCHOOL_IMAGES.principal,
+    email: SCHOOL_INFO.email,
+    phone: SCHOOL_INFO.phone,
+  },
+  {
+    id: 2,
+    name: "Mr. Rajesh Kumar",
+    designation: "Vice Principal",
+    department: "Administration",
+    qualification: "M.Ed., M.Sc.",
+    experience: 15,
+    email: "viceprincipal@littlechamps.edu",
+    phone: SCHOOL_INFO.alternatePhone,
+  },
+  {
+    id: 3,
+    name: "Mrs. Anjali Desai",
+    designation: "HOD - English",
+    department: "Languages",
+    qualification: "M.A. English, B.Ed.",
+    experience: 12,
+    email: "academic@littlechamps.edu",
+    phone: SCHOOL_INFO.phone,
+  },
+  {
+    id: 4,
+    name: "Mr. Suresh Menon",
+    designation: "HOD - Mathematics",
+    department: "Mathematics",
+    qualification: "M.Sc. Mathematics, B.Ed.",
+    experience: 14,
+    email: "academic@littlechamps.edu",
+    phone: SCHOOL_INFO.phone,
+  },
+  {
+    id: 5,
+    name: "Mrs. Deepa Iyer",
+    designation: "Art Teacher",
+    department: "Arts",
+    qualification: "M.F.A., B.Ed.",
+    experience: 10,
+    email: "academic@littlechamps.edu",
+    phone: SCHOOL_INFO.phone,
+  },
+  {
+    id: 6,
+    name: "Mr. Amit Patel",
+    designation: "Sports Director",
+    department: "Physical Education",
+    qualification: "M.P.Ed.",
+    experience: 11,
+    email: "academic@littlechamps.edu",
+    phone: SCHOOL_INFO.phone,
+  },
 ];
 
-const DEPARTMENTS = ["All", "Administration", "Languages", "Mathematics", "Science", "Physical Education", "Arts", "Computer Science"];
+const DEPARTMENTS = ["All", "Administration", "Languages", "Mathematics", "Arts", "Physical Education"];
 
 export default function FacultyPage() {
   const [search, setSearch] = useState("");
@@ -42,6 +97,8 @@ export default function FacultyPage() {
         title="Faculty Directory"
         subtitle="Our Team"
         description="Meet our dedicated team of educators committed to nurturing excellence in every student."
+        image={SCHOOL_IMAGES.classPhoto}
+        imageAlt="Little Champs School faculty and students"
       />
 
       <AnimatedSection className="section-padding">
@@ -70,21 +127,31 @@ export default function FacultyPage() {
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((teacher, i) => (
               <SlideUp key={teacher.id} delay={i * 0.05}>
-                <Card className="overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1 h-full">
-                  <div className="relative h-56 bg-muted">
-                    <Image
-                      src={teacher.image}
-                      alt={teacher.name}
-                      fill
-                      className="object-cover"
-                    />
+                <Card className="overflow-hidden rounded-3xl border-0 shadow-soft hover:shadow-xl transition-all hover:-translate-y-1 h-full">
+                  <div className="relative h-64 bg-slate-100 dark:bg-slate-800">
+                    {"image" in teacher && teacher.image ? (
+                      <SchoolImage
+                        src={teacher.image}
+                        alt={teacher.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover object-top"
+                        rounded={false}
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-brand-blue/10 to-brand-yellow/10">
+                        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-brand-blue to-brand-sky text-white font-display text-2xl font-bold shadow-lg">
+                          {getInitials(teacher.name)}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <CardContent className="p-5">
                     <h3 className="font-semibold text-lg">{teacher.name}</h3>
-                    <p className="text-sm text-gold font-medium">{teacher.designation}</p>
+                    <p className="text-sm text-brand-yellow dark:text-amber-400 font-medium">{teacher.designation}</p>
                     <Badge variant="secondary" className="mt-2 mb-3">{teacher.department}</Badge>
                     <p className="text-xs text-muted-foreground mb-1">{teacher.qualification}</p>
                     <p className="text-xs text-muted-foreground mb-4">{teacher.experience}+ years experience</p>

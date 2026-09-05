@@ -8,6 +8,7 @@ import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
 import { PageHero } from "@/components/shared/page-hero";
 import { AnimatedSection } from "@/components/shared/animated-section";
 import { SectionHeader } from "@/components/shared/section-header";
+import { SchoolMap } from "@/components/shared/school-map";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,15 +16,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { contactSchema } from "@/lib/validations";
 import { SCHOOL_INFO } from "@/lib/school-data";
+import { SCHOOL_IMAGES } from "@/lib/school-images";
 import type { z } from "zod";
 
 type ContactForm = z.infer<typeof contactSchema>;
 
 const DEPARTMENTS = [
-  { name: "Admissions Office", phone: "+91 98765 43210", email: "admissions@littlechamps.edu" },
-  { name: "Accounts Department", phone: "+91 98765 43211", email: "accounts@littlechamps.edu" },
-  { name: "Academic Office", phone: "+91 98765 43212", email: "academic@littlechamps.edu" },
-  { name: "Transport Department", phone: "+91 98765 43213", email: "transport@littlechamps.edu" },
+  { name: "Admissions Office", phone: SCHOOL_INFO.phone, email: SCHOOL_INFO.email },
+  { name: "Accounts Department", phone: SCHOOL_INFO.alternatePhone, email: "accounts@littlechamps.edu" },
+  { name: "Academic Office", phone: SCHOOL_INFO.phone, email: "academic@littlechamps.edu" },
+  { name: "Principal's Office", phone: SCHOOL_INFO.phone, email: SCHOOL_INFO.email },
 ];
 
 export default function ContactPage() {
@@ -62,6 +64,8 @@ export default function ContactPage() {
         title="Contact Us"
         subtitle="Get in Touch"
         description="We'd love to hear from you. Reach out for admissions, inquiries, or any assistance."
+        image={SCHOOL_IMAGES.campusWide}
+        imageAlt="Little Champs School, Bhiwandi"
       />
 
       <AnimatedSection className="section-padding">
@@ -74,7 +78,7 @@ export default function ContactPage() {
             ].map((item, i) => (
               <Card key={i} className="glass-card text-center">
                 <CardContent className="p-6">
-                  <item.icon className="h-8 w-8 text-gold mx-auto mb-3" />
+                  <item.icon className="h-8 w-8 text-brand-yellow dark:text-amber-400 mx-auto mb-3" />
                   <h3 className="font-semibold mb-2">{item.title}</h3>
                   <p className="text-sm text-muted-foreground">{item.content}</p>
                 </CardContent>
@@ -87,31 +91,35 @@ export default function ContactPage() {
               <SectionHeader title="Send us a Message" align="left" />
               <Card>
                 <CardContent className="p-6">
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="name">Name *</Label>
-                        <Input id="name" {...register("name")} />
-                        {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
+                        <Input id="name" autoFocus aria-invalid={!!errors.name} {...register("name")} />
+                        {errors.name && <p className="text-sm text-destructive mt-1" role="alert">{errors.name.message}</p>}
                       </div>
                       <div>
                         <Label htmlFor="phone">Phone *</Label>
-                        <Input id="phone" {...register("phone")} />
+                        <Input id="phone" aria-invalid={!!errors.phone} {...register("phone")} />
+                        {errors.phone && <p className="text-sm text-destructive mt-1" role="alert">{errors.phone.message}</p>}
                       </div>
                     </div>
                     <div>
                       <Label htmlFor="email">Email *</Label>
-                      <Input id="email" type="email" {...register("email")} />
+                      <Input id="email" type="email" aria-invalid={!!errors.email} {...register("email")} />
+                      {errors.email && <p className="text-sm text-destructive mt-1" role="alert">{errors.email.message}</p>}
                     </div>
                     <div>
                       <Label htmlFor="subject">Subject *</Label>
-                      <Input id="subject" {...register("subject")} />
+                      <Input id="subject" aria-invalid={!!errors.subject} {...register("subject")} />
+                      {errors.subject && <p className="text-sm text-destructive mt-1" role="alert">{errors.subject.message}</p>}
                     </div>
                     <div>
                       <Label htmlFor="message">Message *</Label>
-                      <Textarea id="message" rows={5} {...register("message")} />
+                      <Textarea id="message" rows={5} aria-invalid={!!errors.message} {...register("message")} />
+                      {errors.message && <p className="text-sm text-destructive mt-1" role="alert">{errors.message.message}</p>}
                     </div>
-                    <Button type="submit" variant="gold" className="gap-2" disabled={isSubmitting}>
+                    <Button type="submit" variant="default" className="gap-2 w-full sm:w-auto" disabled={isSubmitting}>
                       <Send className="h-4 w-4" />
                       {isSubmitting ? "Sending..." : "Send Message"}
                     </Button>
@@ -126,21 +134,21 @@ export default function ContactPage() {
                 <Card>
                   <CardContent className="p-6 space-y-3">
                     <div className="flex items-center gap-3">
-                      <Clock className="h-5 w-5 text-gold" />
+                      <Clock className="h-5 w-5 text-brand-yellow dark:text-amber-400" />
                       <div>
                         <p className="font-medium">Weekdays</p>
                         <p className="text-sm text-muted-foreground">{SCHOOL_INFO.timings.weekdays}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Clock className="h-5 w-5 text-gold" />
+                      <Clock className="h-5 w-5 text-brand-yellow dark:text-amber-400" />
                       <div>
                         <p className="font-medium">Saturday</p>
                         <p className="text-sm text-muted-foreground">{SCHOOL_INFO.timings.saturday}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Clock className="h-5 w-5 text-gold" />
+                      <Clock className="h-5 w-5 text-brand-yellow dark:text-amber-400" />
                       <div>
                         <p className="font-medium">Office Hours</p>
                         <p className="text-sm text-muted-foreground">{SCHOOL_INFO.timings.office}</p>
@@ -170,17 +178,18 @@ export default function ContactPage() {
           <div className="mt-12">
             <SectionHeader title="Find Us on Map" />
             <div className="rounded-2xl overflow-hidden h-96 bg-muted">
-              <iframe
-                title="Little Champs School Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3771.0!2d72.8777!3d19.0760!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDA0JzMzLjYiTiA3MsKwNTInMzkuNyJF!5e0!3m2!1sen!2sin!4v1234567890"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+              <SchoolMap minHeight={384} />
             </div>
+            <p className="text-center mt-3">
+              <a
+                href={SCHOOL_INFO.mapsLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-semibold text-brand-blue hover:underline"
+              >
+                Open in Google Maps
+              </a>
+            </p>
           </div>
         </div>
       </AnimatedSection>

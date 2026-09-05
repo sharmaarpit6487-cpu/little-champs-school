@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { GraduationCap, LogIn, Eye, EyeOff } from "lucide-react";
+import { LogIn, Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -13,8 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { loginSchema } from "@/lib/validations";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { SchoolLogo } from "@/components/layout/school-logo";
+import { SchoolImage } from "@/components/shared/school-image";
+import { SCHOOL_IMAGES } from "@/lib/school-images";
 import { SCHOOL_INFO } from "@/lib/school-data";
+import { loginSchema } from "@/lib/validations";
+import { getDashboardPath } from "@/lib/rbac";
 import type { z } from "zod";
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -46,20 +51,10 @@ export default function LoginPage() {
         return;
       }
 
-      const res = await fetch("/api/auth/session");
-      const session = await res.json();
-
+      const session = await getSession();
       const role = session?.user?.role;
-      if (["SUPER_ADMIN", "ADMIN", "ACCOUNTANT", "TEACHER"].includes(role)) {
-        router.push("/erp");
-      } else if (role === "PARENT") {
-        router.push("/portal/parent");
-      } else if (role === "STUDENT") {
-        router.push("/portal/student");
-      } else {
-        router.push("/");
-      }
-
+      router.push(role ? getDashboardPath(role) : "/");
+      router.refresh();
       toast.success("Welcome back!");
     } catch {
       toast.error("Login failed. Please try again.");
@@ -69,92 +64,121 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen hero-gradient flex items-center justify-center p-4">
-      <div className="absolute inset-0 hero-pattern opacity-20" />
+    <div className="min-h-screen hero-gradient flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
+      <div className="absolute top-20 right-20 w-64 h-64 bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-3xl animate-blob" aria-hidden="true" />
+      <div className="absolute bottom-20 left-20 w-72 h-72 bg-amber-400/10 dark:bg-amber-400/5 rounded-full blur-3xl animate-blob" aria-hidden="true" />
+
+      <div className="relative w-full max-w-5xl grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="hidden lg:block relative"
+        >
+          <div className="absolute -inset-4 bg-gradient-to-br from-brand-blue/20 to-brand-yellow/20 rounded-[2rem] blur-xl" />
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-blue-500/20">
+            <SchoolImage
+              src={SCHOOL_IMAGES.campus}
+              alt="Little Champs School campus"
+              width={560}
+              height={640}
+              sizes="50vw"
+              priority
+              className="w-full aspect-[7/8]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-blue/80 via-transparent to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+              <p className="font-display text-2xl font-bold mb-2">{SCHOOL_INFO.name}</p>
+              <p className="text-white/90 text-sm">{SCHOOL_INFO.address}, {SCHOOL_INFO.city}</p>
+              <p className="mt-3 font-display text-xl text-brand-yellow italic">{SCHOOL_INFO.motto}</p>
+            </div>
+          </div>
+        </motion.div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative w-full max-w-md"
+        className="relative w-full max-w-md mx-auto lg:max-w-none"
       >
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-3 text-white mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold text-navy">
-              <GraduationCap className="h-7 w-7" />
-            </div>
-            <div className="text-left">
-              <p className="font-display font-bold text-xl">{SCHOOL_INFO.name}</p>
-              <p className="text-sm text-white/70">Portal Login</p>
-            </div>
+          <Link href="/" aria-label="Go to homepage" className="inline-flex justify-center">
+            <SchoolLogo size="lg" />
           </Link>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-3 font-semibold">Portal Login</p>
         </div>
 
-        <Card className="glass-card border-0 shadow-2xl">
-          <CardHeader className="text-center">
-            <CardTitle className="font-display text-2xl">Welcome Back</CardTitle>
-            <CardDescription>
+        <Card className="glass-card border-0 shadow-2xl rounded-3xl overflow-hidden">
+          <div className="h-1.5 bg-gradient-to-r from-blue-600 via-sky-500 to-amber-400" />
+          <CardHeader className="text-center pt-8">
+            <CardTitle className="font-display text-2xl text-slate-800 dark:text-white">Welcome Back!</CardTitle>
+            <CardDescription className="text-slate-500 dark:text-slate-400">
               Sign in to access your dashboard
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <CardContent className="pb-8">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-slate-700 dark:text-slate-300">Email</Label>
                 <Input
                   id="email"
                   type="email"
+                  autoComplete="email"
+                  autoFocus
                   placeholder="you@example.com"
+                  className="mt-1.5"
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
                   {...register("email")}
                 />
                 {errors.email && (
-                  <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
+                  <p id="email-error" className="text-sm text-red-500 mt-1" role="alert">{errors.email.message}</p>
                 )}
               </div>
               <div>
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
+                <Label htmlFor="password" className="text-slate-700 dark:text-slate-300">Password</Label>
+                <div className="relative mt-1.5">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
                     placeholder="••••••••"
+                    className="pr-10"
+                    aria-invalid={!!errors.password}
+                    aria-describedby={errors.password ? "password-error" : undefined}
                     {...register("password")}
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="absolute right-0 top-0 h-full"
+                    className="absolute right-0 top-0 h-11 text-slate-500"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-destructive mt-1">{errors.password.message}</p>
+                  <p id="password-error" className="text-sm text-red-500 mt-1" role="alert">{errors.password.message}</p>
                 )}
               </div>
-              <Button type="submit" variant="gold" className="w-full gap-2" disabled={isLoading}>
+              <Button type="submit" variant="default" className="w-full gap-2 h-12" disabled={isLoading}>
                 <LogIn className="h-4 w-4" />
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
 
-            <div className="mt-6 p-4 rounded-lg bg-muted/50 text-sm">
-              <p className="font-medium mb-2">Demo Credentials:</p>
-              <div className="space-y-1 text-muted-foreground text-xs">
-                <p>Admin: admin@littlechamps.edu / admin123</p>
-                <p>Parent: parent@example.com / parent123</p>
-                <p>Student: student@example.com / student123</p>
-              </div>
-            </div>
-
-            <p className="text-center text-sm text-muted-foreground mt-4">
-              <Link href="/" className="hover:text-foreground transition-colors">
+            <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-5">
+              <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
                 ← Back to website
               </Link>
             </p>
           </CardContent>
         </Card>
       </motion.div>
+      </div>
     </div>
   );
 }

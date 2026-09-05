@@ -1,7 +1,8 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { Role } from "@prisma/client";
-import { authOptions, hasPermission } from "./auth";
+import { authOptions } from "./auth";
+import { hasPermission } from "./rbac";
 
 export async function getAuthSession() {
   return getServerSession(authOptions);

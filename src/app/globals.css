@@ -4,56 +4,48 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    --background: 220 33% 99%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 222 47% 20%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
+    --primary: 217 91% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 40% 97%;
     --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
+    --muted: 220 30% 96%;
     --muted-foreground: 215 16% 47%;
-    --accent: 43 74% 49%;
+    --accent: 43 96% 56%;
     --accent-foreground: 222 47% 11%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 222 47% 20%;
-    --radius: 0.75rem;
-    --gold: 43 74% 49%;
-    --gold-foreground: 222 47% 11%;
-    --navy: 222 47% 20%;
-    --navy-light: 222 47% 35%;
+    --ring: 217 91% 53%;
+    --radius: 1rem;
   }
 
   .dark {
-    --background: 222 47% 8%;
+    --background: 222 47% 11%;
     --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
+    --card: 222 47% 14%;
     --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
+    --popover: 222 47% 14%;
     --popover-foreground: 210 40% 98%;
-    --primary: 43 74% 49%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217 33% 17%;
     --muted-foreground: 215 20% 65%;
-    --accent: 43 74% 49%;
+    --accent: 43 96% 56%;
     --accent-foreground: 222 47% 11%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 43 74% 49%;
-    --gold: 43 74% 49%;
-    --gold-foreground: 222 47% 11%;
-    --navy: 222 47% 20%;
-    --navy-light: 222 47% 35%;
+    --border: 217 33% 22%;
+    --input: 217 33% 22%;
+    --ring: 217 91% 60%;
   }
 }
 
@@ -68,30 +60,56 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-white/20 dark:border-gray-700/30;
+    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/40 dark:border-slate-700/50 shadow-lg;
+  }
+  .glass-nav {
+    @apply bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800 shadow-sm;
   }
   .glass-card {
-    @apply glass rounded-2xl shadow-xl shadow-navy/5;
+    @apply bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-blue-500/5 dark:shadow-none border border-slate-100 dark:border-slate-800;
   }
   .text-gradient {
-    @apply bg-gradient-to-r from-navy to-navy-light bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-600 to-sky-500 bg-clip-text text-transparent;
   }
-  .text-gradient-gold {
-    @apply bg-gradient-to-r from-gold to-amber-400 bg-clip-text text-transparent;
+  .text-gradient-warm {
+    @apply bg-gradient-to-r from-orange-500 to-amber-400 bg-clip-text text-transparent;
   }
   .hero-gradient {
-    @apply bg-gradient-to-br from-navy via-navy-light to-navy;
+    @apply bg-gradient-to-br from-blue-50 via-sky-50 to-amber-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800;
   }
   .section-padding {
     @apply py-16 md:py-24 px-4 md:px-6 lg:px-8;
   }
   .container-custom {
-    @apply max-w-7xl mx-auto;
+    @apply max-w-7xl mx-auto w-full;
+  }
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/5;
+  }
+  .btn-shadow {
+    box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35);
+  }
+  .btn-shadow-warm {
+    box-shadow: 0 4px 14px 0 rgba(251, 146, 60, 0.35);
+  }
+  .page-heading {
+    @apply font-display text-2xl md:text-3xl font-bold text-slate-800 dark:text-white;
+  }
+  .page-subheading {
+    @apply text-slate-500 dark:text-slate-400 font-medium;
+  }
+  .accent-icon {
+    @apply text-brand-yellow dark:text-amber-400;
+  }
+  .signature-text {
+    font-family: var(--font-nunito), cursive;
+    letter-spacing: 0.05em;
   }
 }
 
 html {
   scroll-behavior: smooth;
+  color-scheme: light dark;
 }
 
 ::-webkit-scrollbar {
@@ -104,9 +122,9 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-navy/30 rounded-full;
+  @apply bg-blue-500/30 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-navy/50;
+  @apply bg-blue-500/50;
 }

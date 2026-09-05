@@ -1,75 +1,101 @@
 import { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { Calendar, ArrowRight, Bell } from "lucide-react";
 import { PageHero } from "@/components/shared/page-hero";
 import { AnimatedSection, SlideUp } from "@/components/shared/animated-section";
 import { SectionHeader } from "@/components/shared/section-header";
+import { SchoolImage } from "@/components/shared/school-image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
+import { SCHOOL_IMAGES } from "@/lib/school-images";
+import { SCHOOL_INFO } from "@/lib/school-data";
 
 export const metadata: Metadata = {
   title: "News & Events",
-  description: "Stay updated with the latest news, events, and announcements from Little Champs School.",
+  description: "Stay updated with celebrations, activities, and announcements from Little Champs School, Bhiwandi.",
 };
 
 const EVENTS = [
   {
     id: 1,
-    title: "Annual Day Celebration 2025",
-    description: "Join us for our grand Annual Day celebration featuring cultural performances, awards ceremony, and special guest appearances.",
-    date: "2025-03-15",
+    title: "Red Day Celebration",
+    description: "Students dressed in red for a vibrant day of colours, rhymes, and creative activities — a Little Champs favourite!",
+    date: "2025-06-15",
     type: "CULTURAL",
-    image: "https://images.unsplash.com/photo-1509062522246-3755597927d7?w=600&h=400&fit=crop",
-    location: "School Auditorium",
+    image: SCHOOL_IMAGES.redDayBoys,
+    location: "Little Champs School Campus",
   },
   {
     id: 2,
-    title: "Science Exhibition",
-    description: "Students showcase innovative science projects and experiments. Open to parents and visitors.",
-    date: "2025-02-20",
-    type: "ACADEMIC",
-    image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600&h=400&fit=crop",
-    location: "Science Block",
+    title: "Fancy Dress Competition",
+    description: "Young champs showcased creativity and confidence in our annual fancy dress event.",
+    date: "2025-05-20",
+    type: "CULTURAL",
+    image: SCHOOL_IMAGES.fancyDress,
+    location: "School Auditorium",
   },
   {
     id: 3,
-    title: "Inter-School Sports Meet",
-    description: "Annual sports competition with participating schools from across the district.",
-    date: "2025-01-25",
+    title: "Fruit Day Activity",
+    description: "Hands-on learning about healthy eating — students explored colours, tastes, and nutrition together.",
+    date: "2025-04-10",
+    type: "ACADEMIC",
+    image: SCHOOL_IMAGES.fruitDay,
+    location: "Pre-Primary Block",
+  },
+  {
+    id: 4,
+    title: "Father's Day Celebration",
+    description: "A heartwarming tribute to fathers with performances, crafts, and special moments shared on campus.",
+    date: "2025-06-21",
+    type: "CULTURAL",
+    image: SCHOOL_IMAGES.fathersDayCelebration,
+    location: "Main Hall",
+  },
+  {
+    id: 5,
+    title: "Festival Celebration",
+    description: "Students celebrated our rich cultural heritage with music, dance, and traditional festivities.",
+    date: "2025-03-25",
+    type: "CULTURAL",
+    image: SCHOOL_IMAGES.festivalCelebration,
+    location: "School Ground",
+  },
+  {
+    id: 6,
+    title: "Student Achievements",
+    description: "Our students proudly display awards from state-level competitions and co-curricular events.",
+    date: "2025-02-01",
     type: "SPORTS",
-    image: "https://images.unsplash.com/photo-1461896836934-ffe607ba7951?w=600&h=400&fit=crop",
-    location: "Sports Complex",
+    image: SCHOOL_IMAGES.studentsAchievement,
+    location: "Little Champs School",
   },
 ];
 
 const ANNOUNCEMENTS = [
-  { id: 1, title: "Admissions Open for 2025-26", type: "GENERAL", date: "2025-01-01", content: "Online applications are now being accepted for all classes." },
-  { id: 2, title: "Winter Break Schedule", type: "URGENT", date: "2024-12-15", content: "School will remain closed from Dec 24 to Jan 2. Classes resume on Jan 3." },
-  { id: 3, title: "Fee Payment Deadline - January", type: "FEE", date: "2024-12-20", content: "January month fees must be paid by 10th January 2025 to avoid late fees." },
-  { id: 4, title: "Parent-Teacher Meeting", type: "ACADEMIC", date: "2024-12-10", content: "PTM scheduled for December 28, 2024. Please confirm your attendance." },
+  { id: 1, title: "Admissions Open for 2025-26", type: "GENERAL", date: "2025-01-01", content: "Online applications are now being accepted for Nursery to Class 8." },
+  { id: 2, title: "Summer Vacation Schedule", type: "URGENT", date: "2025-04-15", content: "School timings and vacation dates will be shared via the parent portal and notice board." },
+  { id: 3, title: "Fee Payment Reminder", type: "FEE", date: "2025-04-01", content: "Please ensure monthly fees are paid by the 10th to avoid late charges." },
+  { id: 4, title: "Parent-Teacher Meeting", type: "ACADEMIC", date: "2025-03-28", content: "PTM scheduled for all classes. Please confirm your attendance with the class teacher." },
 ];
 
 const BLOG_POSTS = [
   {
     id: 1,
-    title: "The Importance of Holistic Education",
-    excerpt: "Why modern education must go beyond academics to develop well-rounded individuals.",
-    author: "Dr. Priya Sharma",
-    date: "2024-11-15",
-    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=250&fit=crop",
-    slug: "importance-of-holistic-education",
+    title: "Why Activity-Based Learning Works",
+    excerpt: "From fruit day to fancy dress — how hands-on activities build confidence in young learners.",
+    author: SCHOOL_INFO.principal.name,
+    date: "2025-01-15",
+    image: SCHOOL_IMAGES.fruitDay,
   },
   {
     id: 2,
-    title: "Preparing Students for the Digital Age",
-    excerpt: "How our technology-integrated curriculum prepares students for future careers.",
-    author: "Mr. Rajesh Kumar",
-    date: "2024-10-20",
-    image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=250&fit=crop",
-    slug: "preparing-students-digital-age",
+    title: "Celebrating Every Little Champ",
+    excerpt: "Red Day, Father's Day, and festival celebrations — building memories that last a lifetime.",
+    author: SCHOOL_INFO.principal.name,
+    date: "2024-12-10",
+    image: SCHOOL_IMAGES.celebration,
   },
 ];
 
@@ -88,18 +114,26 @@ export default function NewsPage() {
       <PageHero
         title="News & Events"
         subtitle="Updates"
-        description="Stay informed about upcoming events, important announcements, and school news."
+        description="Celebrations, activities, and important announcements from Little Champs School."
+        image={SCHOOL_IMAGES.celebration}
+        imageAlt="School celebration at Little Champs"
       />
 
       <AnimatedSection className="section-padding">
         <div className="container-custom">
-          <SectionHeader title="Upcoming Events" />
+          <SectionHeader title="Recent Events" description="Real moments captured on our campus" />
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {EVENTS.map((event, i) => (
-              <SlideUp key={event.id} delay={i * 0.1}>
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
-                  <div className="relative h-48">
-                    <Image src={event.image} alt={event.title} fill className="object-cover" />
+              <SlideUp key={event.id} delay={i * 0.08}>
+                <Card className="overflow-hidden rounded-2xl border-0 shadow-soft hover:shadow-xl transition-all h-full card-hover">
+                  <div className="relative h-52">
+                    <SchoolImage
+                      src={event.image}
+                      alt={event.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      rounded={false}
+                    />
                     <Badge className="absolute top-4 left-4" variant={typeColors[event.type] || "default"}>
                       {event.type}
                     </Badge>
@@ -109,9 +143,9 @@ export default function NewsPage() {
                       <Calendar className="h-4 w-4" />
                       {formatDate(event.date)}
                     </div>
-                    <h3 className="font-semibold text-lg mb-2">{event.title}</h3>
+                    <h3 className="font-display font-bold text-lg mb-2">{event.title}</h3>
                     <p className="text-sm text-muted-foreground mb-4">{event.description}</p>
-                    <p className="text-xs text-muted-foreground">📍 {event.location}</p>
+                    <p className="text-xs text-muted-foreground">{event.location}</p>
                   </CardContent>
                 </Card>
               </SlideUp>
@@ -126,13 +160,13 @@ export default function NewsPage() {
           <div className="space-y-4 max-w-3xl mx-auto">
             {ANNOUNCEMENTS.map((announcement, i) => (
               <SlideUp key={announcement.id} delay={i * 0.05}>
-                <Card>
+                <Card className="rounded-2xl border-0 shadow-soft">
                   <CardContent className="p-4 flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/10">
-                      <Bell className="h-5 w-5 text-gold" />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/50">
+                      <Bell className="h-5 w-5 text-brand-yellow dark:text-amber-400" />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <h3 className="font-semibold">{announcement.title}</h3>
                         <Badge variant={typeColors[announcement.type] || "default"} className="text-xs">
                           {announcement.type}
@@ -151,22 +185,28 @@ export default function NewsPage() {
 
       <AnimatedSection className="section-padding">
         <div className="container-custom">
-          <SectionHeader title="From Our Blog" />
+          <SectionHeader title="From Our Principal" />
           <div className="grid md:grid-cols-2 gap-6">
             {BLOG_POSTS.map((post, i) => (
               <SlideUp key={post.id} delay={i * 0.1}>
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+                <Card className="overflow-hidden rounded-2xl border-0 shadow-soft hover:shadow-xl transition-all card-hover">
                   <div className="grid sm:grid-cols-2">
-                    <div className="relative h-48 sm:h-auto">
-                      <Image src={post.image} alt={post.title} fill className="object-cover" />
+                    <div className="relative min-h-[200px] sm:min-h-full">
+                      <SchoolImage
+                        src={post.image}
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, 300px"
+                        rounded={false}
+                      />
                     </div>
                     <CardContent className="p-6 flex flex-col justify-center">
                       <p className="text-xs text-muted-foreground mb-2">
                         {formatDate(post.date)} &bull; {post.author}
                       </p>
-                      <h3 className="font-semibold text-lg mb-2">{post.title}</h3>
+                      <h3 className="font-display font-bold text-lg mb-2">{post.title}</h3>
                       <p className="text-sm text-muted-foreground mb-4">{post.excerpt}</p>
-                      <Button variant="link" className="p-0 h-auto gap-1">
+                      <Button variant="link" className="p-0 h-auto gap-1 self-start">
                         Read More <ArrowRight className="h-4 w-4" />
                       </Button>
                     </CardContent>
